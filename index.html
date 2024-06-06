@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Checker with PyScript</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css">
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Password Checker</h1>
+        <div class="input-wrapper">
+            <input type="password" id="password" placeholder="Enter Password" onclick="togglePasswordVisibility()">
+        </div>
+        <button id="check-btn">Check Password</button>
+        <div class="results" id="results"></div>
+    </div>
+
+    <py-script>
+        import string
+
+        def check_password_strength(password):
+            strength = 0
+            remarks = ''
+            lower_count = upper_count = num_count = wspace_count = special_count = 0
+
+            for char in password:
+                if char in string.ascii_lowercase:
+                    lower_count += 1
+                elif char in string.ascii_uppercase:
+                    upper_count += 1
+                elif char in string.digits:
+                    num_count += 1
+                elif char == ' ':
+                    wspace_count += 1
+                else:
+                    special_count += 1
+
+            if lower_count >= 1:
+                strength += 1
+            if upper_count >= 1:
+                strength += 1
+            if num_count >= 1:
+                strength += 1
+            if wspace_count >= 1:
+                strength += 1
+            if special_count >= 1:
+                strength += 1
+
+            if strength == 1:
+                remarks = "Very Bad Password!!! Change ASAP"
+            elif strength == 2:
+                remarks = "Not A Good Password!!! Change ASAP"
+            elif strength == 3:
+                remarks = "It's a weak password, consider changing"
+            elif strength == 4:
+                remarks = "It's a hard password, but can be better"
+            elif strength == 5:
+                remarks = "A very strong password"
+
+            return {
+                'lower_count': lower_count,
+                'upper_count': upper_count,
+                'num_count': num_count,
+                'wspace_count': wspace_count,
+                'special_count': special_count,
+                'strength': strength,
+                'remarks': remarks
+            }
+
+        def checkPassword(*args):
+            password = Element('password').element.value
+            result = check_password_strength(password)
+            results_div = Element('results').element
+            results_html = f"""
+                <div class='result-item'><strong>Lowercase characters:</strong> {result['lower_count']}</div>
+                <div class='result-item'><strong>Uppercase characters:</strong> {result['upper_count']}</div>
+                <div class='result-item'><strong>Numeric characters:</strong> {result['num_count']}</div>
+                <div class='result-item'><strong>Whitespace characters:</strong> {result['wspace_count']}</div>
+                <div class='result-item'><strong>Special characters:</strong> {result['special_count']}</div>
+                <div class='result-item'><strong>Password Strength:</strong> {result['strength']}</div>
+                <div class='result-item'><strong>Hint:</strong> {result['remarks']}</div>
+            """
+            results_div.innerHTML = results_html
+
+        def togglePasswordVisibility():
+            password_input = Element('password').element
+            if password_input.type == 'password':
+                password_input.type = 'text'
+            else:
+                password_input.type = 'password'
+
+        # Bind the button click to the checkPassword function
+        Element('check-btn').element.onclick = checkPassword
+    </py-script>
+</body>
+</html>
